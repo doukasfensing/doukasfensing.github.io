@@ -16,10 +16,11 @@
             align-items: center;
         }
 
-        /* Container for the GIF */
+        /* Full-screen GIF container */
         #door-container {
-            width: 50%;
-            margin: 20px auto;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
             transition: transform 2s ease;
             transform-origin: left center;
             position: relative;
@@ -78,18 +79,32 @@
             }
         }
 
-        /* Styling for sliding letter */
+        /* Responsive styling for sliding letter */
         #sliding-letter {
-            display: none; /* Initially hidden */
+            display: none;
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 20%;
-            height: 50%;
+            width: 50%;
+            height: auto;
             background-image: url('letter.png');
             background-size: cover;
             animation: slideUp 2s forwards;
+        }
+
+        /* Adjust size for smaller screens */
+        @media (max-width: 768px) {
+            #sliding-letter {
+                width: 30%;
+            }
+        }
+
+        /* Further adjust size for very small screens */
+        @media (max-width: 480px) {
+            #sliding-letter {
+                width: 40%;
+            }
         }
 
         @keyframes slideUp {
@@ -113,9 +128,9 @@
             color: #FFFFFF;
             text-align: center;
             padding: 10px;
-            display: none; /* Initially hidden */
+            display: none;
             position: absolute;
-            top: 30%; /* Move the text lower */
+            top: 70%; /* Move the text lower */
             width: 100%;
         }
 
@@ -129,7 +144,7 @@
             font-size: 18px;
             font-weight: bold;
             color: #FFFFFF;
-            background-color: #7e6f54;
+            background-color: #6A0DAD;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -139,7 +154,7 @@
 </head>
 <body>
 
-<!-- Door Container with Embedded GIF -->
+<!-- Full-screen GIF container -->
 <div id="door-container">
     <div class="tenor-gif-embed" data-postid="8715744322925314600" data-share-method="host" data-aspect-ratio="0.544177" data-width="100%">
         <a href="https://tenor.com/view/fat-lady-harry-potter-gif-8715744322925314600">Fat Lady Harry Potter GIF</a> from
