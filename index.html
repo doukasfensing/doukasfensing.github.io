@@ -9,13 +9,13 @@
         #door-container {
             width: 50%;
             margin: 20px auto;
-            transition: transform 2s ease; /* Smooth opening effect */
+            transition: transform 2s ease;
             transform-origin: left center;
         }
 
         /* Open state for the door (left slide) */
         .open {
-            transform: translateX(-100%); /* Moves the GIF to the left */
+            transform: translateX(-100%);
         }
 
         /* Magic text styling */
@@ -29,39 +29,31 @@
         }
 
         /* Status indicator */
-        #status {
-            display: block;
+        #status, #spoken-text {
             text-align: center;
             margin: 20px auto;
             font-size: 18px;
-            color: green;
             font-weight: bold;
         }
 
-        /* Responsive styling for smaller screens */
-        @media (max-width: 768px) {
-            #door-container {
-                width: 80%; /* Adjusts width to 80% on smaller screens */
-            }
-            #magic-text {
-                font-size: 18px; /* Reduces font size for smaller screens */
-            }
-            #status {
-                font-size: 16px; /* Adjusts the status text for readability */
-            }
+        #status {
+            color: green;
         }
 
-        /* Additional adjustments for very small screens */
+        /* Displaying the spoken text */
+        #spoken-text {
+            color: #333;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            #door-container { width: 80%; }
+            #magic-text, #status, #spoken-text { font-size: 16px; }
+        }
+
         @media (max-width: 480px) {
-            #door-container {
-                width: 90%; /* Further adjusts for very small screens */
-            }
-            #magic-text {
-                font-size: 16px;
-            }
-            #status {
-                font-size: 14px;
-            }
+            #door-container { width: 90%; }
+            #magic-text, #status, #spoken-text { font-size: 14px; }
         }
     </style>
 </head>
@@ -78,67 +70,68 @@
 
 <!-- Status Display -->
 <div id="status">Listening for "Alohomora"... 🔊</div>
+<!-- Spoken Text Display -->
+<div id="spoken-text">You said: </div>
 
 <!-- Magic Text to Show after Door Opens -->
 <div id="magic-text">Welcome to the Magical World!</div>
 
 <script>
-    // Check if the browser supports the Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         alert("Your browser does not support speech recognition. Please use Chrome or another supported browser.");
     }
 
-    // Initialize Speech Recognition
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = false;
-    recognition.continuous = true; // Keeps listening continuously
+    recognition.continuous = true;
 
-    // Function to open the GIF door and display magic text
     function openDoor() {
         const doorContainer = document.getElementById('door-container');
         const magicText = document.getElementById('magic-text');
 
-        // Add the open class to simulate door sliding left
         doorContainer.classList.add('open');
 
-        // Display the magic text after the door opens
         setTimeout(() => {
             magicText.style.display = 'block';
-        }, 2000); // Delay matches the door opening animation time
+        }, 2000);
     }
 
-    // Start continuous voice recognition
     function startListening() {
         recognition.start();
     }
 
-    // Event listener for speech recognition results
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+        // Capture all recognized words up to this point
+        const transcriptArray = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join(' ');
+        const transcript = transcriptArray.trim().toLowerCase();
+
         console.log("You said:", transcript);
 
-        if (transcript === "alohomora") {
+        // Update the spoken-text div with the full phrase the user said
+        document.getElementById('spoken-text').innerText = `You said: ${transcript}`;
+
+        // Check for the magic word "alohomora"
+        if (transcript.includes("alohomora")) {
             openDoor();
             recognition.stop(); // Stop listening once the door is open
             document.getElementById('status').innerText = "Access Granted!";
         }
     };
 
-    // Restart recognition when it stops unexpectedly
     recognition.onend = () => {
         if (!document.getElementById('door-container').classList.contains('open')) {
-            recognition.start(); // Restart listening if the door hasn’t opened
+            recognition.start();
         }
     };
 
-    // Error handling
     recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
     };
 
-    // Start the speech recognition automatically when the page loads
     window.onload = startListening;
 </script>
 
