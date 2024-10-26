@@ -3,14 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magical Door with Responsive GIF</title>
+    <title>Magical Door with Flying Letters</title>
     <style>
+        /* Set the entire page's background to black */
+        body {
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         /* Container for the GIF */
         #door-container {
             width: 50%;
             margin: 20px auto;
             transition: transform 2s ease;
             transform-origin: left center;
+            position: relative;
         }
 
         /* Open state for the door (left slide) */
@@ -31,29 +43,97 @@
         /* Status indicator */
         #status, #spoken-text {
             text-align: center;
-            margin: 20px auto;
             font-size: 18px;
             font-weight: bold;
+            color: #FFFFFF;
         }
 
         #status {
-            color: green;
+            color: #00FF00;
         }
 
-        /* Displaying the spoken text */
-        #spoken-text {
-            color: #333;
+        /* Flying letters styling */
+        .letter {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-image: url('image.png');
+            background-size: cover;
+            background-position: center;
+            animation: flyToBottom 3s ease-in-out forwards;
+            opacity: 0;
+            --translate-x: 0px;
+            --translate-y: 0vh;
+            --final-rotation: 0deg;
         }
 
-        /* Responsive styling */
-        @media (max-width: 768px) {
-            #door-container { width: 80%; }
-            #magic-text, #status, #spoken-text { font-size: 16px; }
+        @keyframes flyToBottom {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--translate-x), var(--translate-y)) rotate(var(--final-rotation));
+                opacity: 1;
+            }
         }
 
-        @media (max-width: 480px) {
-            #door-container { width: 90%; }
-            #magic-text, #status, #spoken-text { font-size: 14px; }
+        /* Styling for sliding letter */
+        #sliding-letter {
+            display: none; /* Initially hidden */
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20%;
+            height: 50%;
+            background-image: url('letter.png');
+            background-size: cover;
+            animation: slideUp 2s forwards;
+        }
+
+        @keyframes slideUp {
+            0% {
+                bottom: -110%;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1; /* Fade in at the start of the slide */
+            }
+            100% {
+                bottom: 30%; /* Adjusted to a higher position on the screen */
+                opacity: 1;
+            }
+        }
+
+        /* Handwritten text effect inside the letter */
+        #handwritten-text {
+            font-family: 'Cursive', serif;
+            font-size: 1.5em;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 10px;
+            display: none; /* Initially hidden */
+            position: absolute;
+            top: 30%; /* Move the text lower */
+            width: 100%;
+        }
+
+        /* Button styling */
+        #start-button {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFFFFF;
+            background-color: #7e6f54;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10; /* Ensure the button appears above other elements */
         }
     </style>
 </head>
@@ -76,6 +156,14 @@
 <!-- Magic Text to Show after Door Opens -->
 <div id="magic-text">Welcome to the Magical World!</div>
 
+<!-- Sliding Letter Element -->
+<div id="sliding-letter">
+    <div id="handwritten-text"></div>
+</div>
+
+<!-- Button to Start Animation -->
+<button id="start-button">Say Alohomora or Press Here</button>
+
 <script>
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -87,37 +175,44 @@
     recognition.interimResults = false;
     recognition.continuous = true;
 
+    let doorInitialCenterX = 0;
+    let doorInitialTopY = 0;
+
+    // Function to open the door and start animations
     function openDoor() {
         const doorContainer = document.getElementById('door-container');
         const magicText = document.getElementById('magic-text');
+
+        const doorRect = doorContainer.getBoundingClientRect();
+        doorInitialCenterX = doorRect.left + doorRect.width / 2;
+        doorInitialTopY = doorRect.top;
 
         doorContainer.classList.add('open');
 
         setTimeout(() => {
             magicText.style.display = 'block';
+            releaseLetters();
+            setTimeout(() => {
+                document.getElementById('sliding-letter').style.display = 'block';
+                setTimeout(showHandwrittenMessage, 2000); // Delay before starting handwritten message
+            }, 2000);
         }, 2000);
     }
 
+    // Function to listen for "Alohomora" command
     function startListening() {
         recognition.start();
     }
 
     recognition.onresult = (event) => {
-        // Capture all recognized words up to this point
-        const transcriptArray = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join(' ');
+        const transcriptArray = Array.from(event.results).map(result => result[0].transcript).join(' ');
         const transcript = transcriptArray.trim().toLowerCase();
 
-        console.log("You said:", transcript);
-
-        // Update the spoken-text div with the full phrase the user said
         document.getElementById('spoken-text').innerText = `You said: ${transcript}`;
 
-        // Check for the magic word "alohomora"
         if (transcript.includes("alohomora")) {
             openDoor();
-            recognition.stop(); // Stop listening once the door is open
+            recognition.stop();
             document.getElementById('status').innerText = "Access Granted!";
         }
     };
@@ -132,7 +227,55 @@
         console.error("Speech recognition error:", event.error);
     };
 
+    // Automatically start listening on load
     window.onload = startListening;
+
+    // Function to release flying letters
+    function releaseLetters() {
+        const numberOfLetters = 100;
+        for (let i = 0; i < numberOfLetters; i++) {
+            const letter = document.createElement('div');
+            letter.classList.add('letter');
+
+            const randomTranslateX = Math.floor(Math.random() * 400) - 200;
+            letter.style.setProperty('--translate-x', `${randomTranslateX}px`);
+
+            const randomFinalRotation = Math.floor(Math.random() * 720);
+            letter.style.setProperty('--final-rotation', `${randomFinalRotation}deg`);
+
+            const randomFinalTranslateY = Math.floor(Math.random() * 20) + 80;
+            letter.style.setProperty('--translate-y', `${randomFinalTranslateY}vh`);
+
+            letter.style.left = `${doorInitialCenterX - 25}px`;
+            letter.style.top = `${doorInitialTopY - 25}px`;
+
+            letter.style.animationDelay = `${Math.random() * 2}s`;
+            document.body.appendChild(letter);
+        }
+    }
+
+    // Function to display the handwritten message letter by letter
+    function showHandwrittenMessage() {
+        const message = "Happy Nameday Babe";
+        const handwrittenText = document.getElementById("handwritten-text");
+        handwrittenText.style.display = "block";
+        let index = 0;
+
+        function typeNextLetter() {
+            if (index < message.length) {
+                handwrittenText.innerHTML += message[index];
+                index++;
+                setTimeout(typeNextLetter, 150); // Adjust delay for slower typing effect
+            }
+        }
+
+        typeNextLetter();
+    }
+
+    // Start the animation when the button is clicked
+    document.getElementById("start-button").addEventListener("click", () => {
+        openDoor();
+    });
 </script>
 
 </body>
