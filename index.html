@@ -38,14 +38,6 @@
             font-weight: bold;
         }
 
-        /* Display for recognized text */
-        #recognized-text {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 16px;
-            color: #333;
-        }
-
         /* Responsive styling for smaller screens */
         @media (max-width: 768px) {
             #door-container {
@@ -87,9 +79,6 @@
 <!-- Status Display -->
 <div id="status">Listening for "Alohomora"... 🔊</div>
 
-<!-- Recognized Text Display -->
-<div id="recognized-text"></div>
-
 <!-- Magic Text to Show after Door Opens -->
 <div id="magic-text">Welcome to the Magical World!</div>
 
@@ -128,9 +117,7 @@
     // Event listener for speech recognition results
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim().toLowerCase();
-
-        // Display the recognized text on the page
-        document.getElementById('recognized-text').innerText = `You said: "${transcript}"`;
+        console.log("You said:", transcript);
 
         if (transcript === "alohomora") {
             openDoor();
