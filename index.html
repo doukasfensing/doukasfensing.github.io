@@ -82,6 +82,9 @@
 <!-- Magic Text to Show after Door Opens -->
 <div id="magic-text">Welcome to the Magical World!</div>
 
+<!-- Button to request mic access and start recognition -->
+<button onclick="startListening()">Click to Allow Microphone Access and Start Listening</button>
+
 <script>
     // Check if the browser supports the Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -137,9 +140,6 @@
     recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
     };
-
-    // Start the speech recognition automatically when the page loads
-    window.onload = startListening;
 </script>
 
 </body>
