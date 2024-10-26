@@ -40,17 +40,7 @@
             margin-top: 20px;
         }
 
-        /* Status indicator */
-        #status, #spoken-text {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #FFFFFF;
-        }
 
-        #status {
-            color: #00FF00;
-        }
 
         /* Flying letters styling */
         .letter {
@@ -101,7 +91,7 @@
                 opacity: 1; /* Fade in at the start of the slide */
             }
             100% {
-                bottom: 30%; /* Adjusted to a higher position on the screen */
+                bottom: 10%; /* Adjusted to a higher position on the screen */
                 opacity: 1;
             }
         }
@@ -148,10 +138,7 @@
 </div>
 <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 
-<!-- Status Display -->
-<div id="status">Listening for "Alohomora"... 🔊</div>
-<!-- Spoken Text Display -->
-<div id="spoken-text">You said: </div>
+
 
 <!-- Magic Text to Show after Door Opens -->
 <div id="magic-text">Welcome to the Magical World!</div>
@@ -208,12 +195,10 @@
         const transcriptArray = Array.from(event.results).map(result => result[0].transcript).join(' ');
         const transcript = transcriptArray.trim().toLowerCase();
 
-        document.getElementById('spoken-text').innerText = `You said: ${transcript}`;
 
         if (transcript.includes("alohomora")) {
             openDoor();
             recognition.stop();
-            document.getElementById('status').innerText = "Access Granted!";
         }
     };
 
